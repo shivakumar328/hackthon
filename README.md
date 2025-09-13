@@ -31,7 +31,11 @@ npm install
 ```bash
 npm run dev
 ```
-Visit [http://localhost:8080](http://localhost:8080) to view the app.
+
+Visit [http://localhost:8080](http://localhost:8080) to view the app on your machine.
+
+For access from other devices on your network, use:
+[http://192.168.234.1:8080](http://192.168.234.1:8080)
 
 ### Build
 ```bash
