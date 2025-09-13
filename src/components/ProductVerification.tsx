@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,8 +25,38 @@ const mockVerificationData = {
 
 export const ProductVerification = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [verificationResult, setVerificationResult] = useState<any>(null);
+  type VerificationResult = typeof mockVerificationData[keyof typeof mockVerificationData] | null;
+  const [verificationResult, setVerificationResult] = useState<VerificationResult>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  // Open camera and show video preview
+  const handleScanQR = async () => {
+    setCameraError(null);
+    setShowCamera(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+    } catch (err) {
+      setCameraError("Unable to access camera. Please allow camera permissions and try again.");
+      setShowCamera(false);
+    }
+  };
+
+  // Close camera and stop stream
+  const handleCloseCamera = () => {
+    setShowCamera(false);
+    setCameraError(null);
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
+      videoRef.current.srcObject = null;
+    }
+  };
 
   const handleVerification = async () => {
     setIsSearching(true);
@@ -71,10 +101,31 @@ export const ProductVerification = () => {
                 </>
               )}
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleScanQR} type="button">
               <QrCode className="w-4 h-4 mr-2" />
               Scan QR
             </Button>
+          {/* Camera Modal/Preview */}
+          {showCamera && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+              <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full relative">
+                <button
+                  className="absolute top-2 right-2 text-lg font-bold text-gray-500 hover:text-gray-800"
+                  onClick={handleCloseCamera}
+                  aria-label="Close camera preview"
+                >
+                  ×
+                </button>
+                <h2 className="text-lg font-semibold mb-4">Scan QR Code</h2>
+                {cameraError ? (
+                  <div className="text-destructive mb-4">{cameraError}</div>
+                ) : (
+                  <video ref={videoRef} className="w-full h-64 bg-black rounded mb-4" autoPlay playsInline />
+                )}
+                <div className="text-sm text-muted-foreground">Point your camera at a QR code. (QR scanning logic can be added here.)</div>
+              </div>
+            </div>
+          )}
           </div>
 
           {verificationResult && (
