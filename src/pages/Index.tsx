@@ -189,7 +189,7 @@ const Index = () => {
               <span className="text-lg font-semibold text-foreground">Harvest Hub</span>
             </div>
             <div className="text-sm text-muted-foreground">
-              © 2024 Harvest Hub. Powered by blockchain technology.
+              © 2025 Harvest Hub. Powered by logic lords.
             </div>
           </div>
         </div>
